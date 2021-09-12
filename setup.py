@@ -1,6 +1,7 @@
-import setuptools
+import os
+from typing import Dict
 
-from version import __version__
+import setuptools
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -15,9 +16,13 @@ EXTRA_REQUIRES["devel"] = (
     EXTRA_REQUIRES["lint"] + EXTRA_REQUIRES["mypy"] + EXTRA_REQUIRES["test"] + EXTRA_REQUIRES["prec"]
 )
 
+about: Dict[str, str] = {}
+with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "version.py"), "r") as f:
+    exec(f.read(), about)
+
 setuptools.setup(
     name="python-degiro",
-    version=__version__,
+    version=about["__version__"],
     author="Lorenz Kraus and Jorrick Sleijster",
     author_email="jorricks3@gmail.com",
     description="An unofficial API for the trading platform Degiro written in Python",
