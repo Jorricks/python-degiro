@@ -242,3 +242,20 @@ degiro.sell_order(OrderType.STOPLOSS, Product(products[0]).id, 3, 1, None, 38)
 ## Usage
 
 For documented examples see [examples.py](https://github.com/lolokraus/DegiroAPI/blob/master/examples/examples.py)
+
+## Contributing
+
+How great this project will turn out to be, totally depends on you.
+If you think you have a great addition, please create a PR :).
+If you are unfamilar with `pull requests`, please take a look [here](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request).
+
+### Requirements
+In order for your commit to be accepted, please install pre-commit.
+This will run a couple of tools to make sure the formatting of the code is good and there are no obvious mistakes.
+
+### Installing pre-commit
+```shell
+pre-commit install
+```
+Now everytime you will commit, it will automatically run the pre-commit hooks.
+If you are using Pycharm, the errors appear in `git(left bottom) -> console`.
