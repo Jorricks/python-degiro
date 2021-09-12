@@ -1,4 +1,5 @@
-class Data:
-    class Type:
-        PORTFOLIO = 'portfolio'
-        CASHFUNDS = 'cashFunds'
+class DeGiroDataType:
+    """The types of assets in DeGiro."""
+
+    PORTFOLIO = "portfolio"
+    CASH_FUNDS = "cashFunds"

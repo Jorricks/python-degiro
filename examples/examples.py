@@ -1,29 +1,31 @@
-import degiroapi
-from degiroapi.product import Product
-from degiroapi.order import Order
-from degiroapi.utils import pretty_json
-
 from datetime import datetime, timedelta
 
+from degiroapi.datatypes import DeGiroDataType
+from degiroapi.degiro import DeGiro
+from degiroapi.intervaltypes import DeGiroIntervalType
+from degiroapi.order import OrderType
+from degiroapi.product import Product
+from degiroapi.utils import pretty_json
+
 # login
-degiro = degiroapi.DeGiro()
+degiro = DeGiro()
 degiro.login("username", "password")
 
 # logout
 degiro.logout()
 
 # print the current cash funds
-cashfunds = degiro.getdata(degiroapi.Data.Type.CASHFUNDS)
+cashfunds = degiro.get_data(DeGiroDataType.CASH_FUNDS)
 for data in cashfunds:
     print(data)
 
 # print the current portfolio (True to filter Products with size 0, False to show all)
-portfolio = degiro.getdata(degiroapi.Data.Type.PORTFOLIO, True)
+portfolio = degiro.get_data(DeGiroDataType.PORTFOLIO, True)
 for data in portfolio:
     print(data)
 
 # output one search result
-products = degiro.search_products('Pfizer')
+products = degiro.search_products("Pfizer")
 print(Product(products[0]).id)
 print(Product(products[0]).name)
 print(Product(products[0]).symbol)
@@ -35,7 +37,7 @@ print(Product(products[0]).close_price)
 print(Product(products[0]).close_price_date)
 
 # output multiple search result
-products = degiro.search_products('Pfizer', 3)
+products = degiro.search_products("Pfizer", 3)
 print(Product(products[0]).id)
 print(Product(products[1]).id)
 print(Product(products[2]).id)
@@ -58,22 +60,22 @@ print(pretty_json(orders))
 
 # deleting an open order
 orders = degiro.orders(datetime.now() - timedelta(days=1), datetime.now(), True)
-degiro.delete_order(orders[0]['orderId'])
+degiro.delete_order(orders[0]["orderId"])
 
 degiro.delete_order("f278d56f-eaa0-4dc7-b067-45c6b4b3d74f")
 
 # getting realtime and historical data from a stock
-products = degiro.search_products('nrz')
+products = degiro.search_products("nrz")
 
 # Interval can be set to One_Day, One_Week, One_Month, Three_Months, Six_Months, One_Year, Three_Years, Five_Years, Max
-realprice = degiro.real_time_price(Product(products[0]).id, degiroapi.Interval.Type.One_Day)
+realprice = degiro.real_time_price(Product(products[0]).id, DeGiroIntervalType.One_Day)
 
 # reatime data
-print(realprice[0]['data']['lastPrice'])
-print(pretty_json(realprice[0]['data']))
+print(realprice[0]["data"]["lastPrice"])
+print(pretty_json(realprice[0]["data"]))
 
 # historical data
-print(realprice[1]['data'])
+print(realprice[1]["data"])
 
 # get s&p 500 stock list
 sp5symbols = []
@@ -89,29 +91,36 @@ for product in products:
 
 # placing an order(dependent on the order type)
 # set a limit order price to which the order gets executed
-# order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for unlimited, size, limit(the limit price)
-degiro.buyorder(Order.Type.LIMIT, Product(products[0]).id, 3, 1, 30)
+# order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for unlimited, size,
+# limit(the limit price)
+degiro.buy_order(OrderType.LIMIT, Product(products[0]).id, 3, 1, 30)
 
 # sets a limit order when the stoploss price is reached(not bought for more than the limit at the stop loss price)
-# order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for "unlimited"), size, limit(the limit price), stop_loss(stop loss price)
-degiro.buyorder(Order.Type.STOPLIMIT, Product(products[0]).id, 3, 1, 38, 38)
+# order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for "unlimited"), size,
+# limit(the limit price), stop_loss(stop loss price)
+degiro.buy_order(OrderType.STOP_LIMIT, Product(products[0]).id, 3, 1, 38, 38)
 
 # order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for "unlimited"), size
-degiro.buyorder(Order.Type.MARKET, Product(products[0]).id, 3, 1)
+degiro.buy_order(OrderType.MARKET, Product(products[0]).id, 3, 1)
 
-# the stop loss price has to be higher than the current price, when current price reaches the stoploss price the order is placed
-# order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for "unlimited"), size, don't change none, stop_loss(stop loss price)
-degiro.buyorder(Order.Type.STOPLOSS, Product(products[0]).id, 3, 1, None, 38)
+# the stop loss price has to be higher than the current price, when current price reaches the stoploss price the order
+# is placed
+# order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for "unlimited"), size,
+# don't change none, stop_loss(stop loss price)
+degiro.buy_order(OrderType.STOP_LOSS, Product(products[0]).id, 3, 1, None, 38)
 
 # selling a product
-# order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for unlimited, size, limit(the limit price)
-degiro.sellorder(Order.Type.LIMIT, Product(products[0]).id, 3, 1, 40)
+# order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for unlimited, size,
+# limit(the limit price)
+degiro.sell_order(OrderType.LIMIT, Product(products[0]).id, 3, 1, 40)
 
-# order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for "unlimited"), size, limit(the limit price), stop_loss(stop loss price)
-degiro.sellorder(Order.Type.STOPLIMIT, Product(products[0]).id, 3, 1, 37, 38)
+# order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for "unlimited"), size,
+# limit(the limit price), stop_loss(stop loss price)
+degiro.sell_order(OrderType.STOP_LIMIT, Product(products[0]).id, 3, 1, 37, 38)
 
 # order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for "unlimited"), size
-degiro.sellorder(Order.Type.MARKET, Product(products[0]).id, 3, 1)
+degiro.sell_order(OrderType.MARKET, Product(products[0]).id, 3, 1)
 
-# order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for "unlimited"), size, don't change none, stop_loss(stop loss price)
-degiro.sellorder(Order.Type.STOPLOSS, Product(products[0]).id, 3, 1, None, 38)
+# order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for "unlimited"), size,
+# don't change none, stop_loss(stop loss price)
+degiro.sell_order(OrderType.STOP_LOSS, Product(products[0]).id, 3, 1, None, 38)
