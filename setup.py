@@ -1,4 +1,5 @@
 import setuptools
+
 from version import __version__
 
 with open("README.md", "r") as fh:
@@ -24,12 +25,12 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/lolokraus/DegiroAPI",
     packages=setuptools.find_packages(),
-    install_requires=["requests==2.26.0"],
+    install_requires=["requests>=2.0.0"],
     extras_require=EXTRA_REQUIRES,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires=">=3.6",
 )
