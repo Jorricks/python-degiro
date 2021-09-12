@@ -1,0 +1,68 @@
+---
+default_stages: [commit, push]
+default_language_version:
+  # force all unspecified python hooks to run python3
+  python: python3
+minimum_pre_commit_version: "1.20.0"
+repos:
+  - repo: meta
+    hooks:
+      - id: identity
+      - id: check-hooks-apply
+  - repo: local
+    hooks:
+      - id: no-relative-imports
+        language: pygrep
+        name: No relative imports
+        description: "Use absolute imports only"
+        entry: "^\\s*from\\s+\\."
+        pass_filenames: true
+        files: \.py$
+        exclude: ^tests/|^airflow/_vendor/
+      - id: language-matters
+        language: pygrep
+        name: Check for language that we do not accept as community
+        description: "Please use deny_list or allow_list instead."
+        entry: "(?i)(black|white)[_-]?list"
+        pass_filenames: true
+      - id: isort
+        name: iSort - Sorting the imports.
+        description: "Sorts your import for you."
+        entry: venv/bin/python3 -m isort
+        language: system
+        types: [python]
+        files: \.py$
+        pass_filenames: true
+      - id: flake8
+        name: flake8 - Enforce code style.
+        description: "A command-line utility for enforcing style consistency across Python projects."
+        entry: venv/bin/python3 -m flake8
+        language: system
+        types: [ python ]
+        files: \.py$
+        pass_filenames: true
+      - id: mypy
+        name: mypy - Runs type checking.
+        description: "Optional Static Typing for Python"
+        entry: venv/bin/python3 -m mypy --no-strict-optional --ignore-missing-imports
+        language: system
+        types: [ python ]
+        files: \.py$
+        pass_filenames: true
+      - id: pydocstyle
+        name: pydocstyle
+        description: "pydocstyle is a static analysis tool for checking compliance with Python docstring conventions."
+        entry: venv/bin/python3 -m pydocstyle --convention=pep257 --add-ignore=D100,D102,D103,D104,D105,D107,D205,D400,D401
+        language: system
+        types: [ python ]
+        files: \.py$
+        pass_filenames: true
+        exclude: tests/.*
+      - id: black
+        name: black
+        description: "Black: The uncompromising Python code formatter"
+        entry: venv/bin/python3 -m black --config=./pyproject.toml
+        language: system
+        types: [ python ]
+        files: \.py$
+        pass_filenames: true
