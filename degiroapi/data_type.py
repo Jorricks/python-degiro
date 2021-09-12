@@ -1,4 +1,4 @@
-class DeGiroDataType:
+class DataType:
     """The types of assets in DeGiro."""
 
     PORTFOLIO = "portfolio"

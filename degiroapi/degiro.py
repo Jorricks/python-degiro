@@ -5,9 +5,9 @@ from typing import List, Mapping, Optional, Tuple, Union
 import requests
 
 from degiroapi.client_info import ClientInfo
-from degiroapi.datatypes import DeGiroDataType
+from degiroapi.data_type import DataType
 from degiroapi.exceptions import DeGiroRequiresTOTP
-from degiroapi.order import OrderType
+from degiroapi.order_type import OrderType
 
 
 class DeGiro:
@@ -247,7 +247,7 @@ class DeGiro:
     def get_data(self, datatype: str, filter_zero: bool = False) -> List[Mapping]:
         data_payload = {datatype: 0}
 
-        if datatype == DeGiroDataType.CASH_FUNDS:
+        if datatype == DataType.CASH_FUNDS:
             return self.filter_cash_funds(
                 self.__request(  # type: ignore
                     DeGiro.__DATA_URL + str(self.client_info.account_id) + ";jsessionid=" + self.session_id,
@@ -256,7 +256,7 @@ class DeGiro:
                     error_message="Could not get data",
                 )
             )
-        elif datatype == DeGiroDataType.PORTFOLIO:
+        elif datatype == DataType.PORTFOLIO:
             return self.filter_portfolio(
                 self.__request(  # type: ignore
                     DeGiro.__DATA_URL + str(self.client_info.account_id) + ";jsessionid=" + self.session_id,

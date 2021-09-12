@@ -28,8 +28,8 @@ pip install degiroapi
 ### Logging in
 
 ``` python
-import degiroapi
-degiro = degiroapi.DeGiro()
+frmo degiroapi.degiro import DeGiro
+degiro = DeGiro()
 degiro.login("username", "password")
 ```
 
@@ -59,7 +59,8 @@ degiro.logout()
 Printing your current cash funds:
 
 ``` python
-cashfunds = degiro.get_data(degiroapi.Data.Type.CASHFUNDS)
+from degiroapi.data_type import DataType
+cashfunds = degiro.get_data(DataType.CASHFUNDS)
 for data in cashfunds:
     print(data)
 ```
@@ -67,7 +68,8 @@ for data in cashfunds:
 Printing your current portfolio, argument True to filter out products with a size of 0, False or no Argument to show all:
 
 ``` python
-portfolio = degiro.get_data(degiroapi.Data.Type.PORTFOLIO, True)
+from degiroapi.data_type import DataType
+portfolio = degiro.get_data(DataType.PORTFOLIO, True)
 for data in portfolio:
     print(data)
 ```
@@ -134,9 +136,11 @@ degiro.delete_order("f278d56f-eaa0-4dc7-b067-45c6b4b3d74f")
 Get the real time price and the historical data of a stock:
 
 ``` python
+from degiro.interval_type import IntervalType
+
 products = degiro.search_products('nrz')
 # Interval can be set to One_Day, One_Week, One_Month, Three_Months, Six_Months, One_Year, Three_Years, Five_Years, Max
-realprice = degiro.real_time_price(Product(products[0]).id, degiroapi.Interval.Type.One_Day)
+realprice = degiro.real_time_price(Product(products[0]).id, IntervalType.One_Day)
 
 # getting the real time price
 print(realprice[0]['data']['lastPrice'])
@@ -176,7 +180,8 @@ You have to set a limit order price to which the order gets executed.
 **arguments**: order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for unlimited, size, limit(the limit price)
 
 ``` python
-degiro.buy_order(Order.Type.LIMIT, Product(products[0]).id, 3, 1, 30)
+from degiroapi.order_type import OrderType
+degiro.buy_order(OrderType.LIMIT, Product(products[0]).id, 3, 1, 30)
 ```
 
 ### StopLimit order
@@ -185,7 +190,8 @@ Sets a limit order when the stoploss price is reached (not bought for more than 
 **arguments**: order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for "unlimited"), size, limit(the limit price), stop_loss(stop loss price)
 
 ``` python
-degiro.buy_order(Order.Type.STOPLIMIT, Product(products[0]).id, 3, 1, 38, 38)
+from degiroapi.order_type import OrderType
+degiro.buy_order(OrderType.STOPLIMIT, Product(products[0]).id, 3, 1, 38, 38)
 ```
 
 ### Market order
@@ -194,7 +200,8 @@ Bought at the market price:
 **arguments**: order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for "unlimited"), size
 
 ``` python
-degiro.buy_order(Order.Type.MARKET, Product(products[0]).id, 3, 1)
+from degiroapi.order_type import OrderType
+degiro.buy_order(OrderType.MARKET, Product(products[0]).id, 3, 1)
 ```
 
 ### StopLoss order
@@ -203,7 +210,8 @@ The stop loss price has to be higher than the current price, when current price 
 **arguments**: order type, product id, execution time type (either 1 for "valid on a daily basis", or 3 for "unlimited"), size
 
 ``` python
-degiro.buy_order(Order.Type.STOPLOSS, Product(products[0]).id, 3, 1, None, 38)
+from degiroapi.order_type import OrderType
+degiro.buy_order(OrderType.STOPLOSS, Product(products[0]).id, 3, 1, None, 38)
 ```
 
 ## sell_order
@@ -212,19 +220,23 @@ Placing a sell order is dependent on the order Type:
 Equivalent to the buy orders:
 
 ``` python
-degiro.sell_order(Order.Type.LIMIT, Product(products[0]).id, 3, 1, 40)
+from degiroapi.order_type import OrderType
+degiro.sell_order(OrderType.LIMIT, Product(products[0]).id, 3, 1, 40)
 ```
 
 ``` python
-degiro.sell_order(Order.Type.STOPLIMIT, Product(products[0]).id, 3, 1, 37, 38)
+from degiroapi.order_type import OrderType
+degiro.sell_order(OrderType.STOPLIMIT, Product(products[0]).id, 3, 1, 37, 38)
 ```
 
 ``` python
-degiro.sell_order(Order.Type.MARKET, Product(products[0]).id, 3, 1)
+from degiroapi.order_type import OrderType
+degiro.sell_order(OrderType.MARKET, Product(products[0]).id, 3, 1)
 ```
 
 ``` python
-degiro.sell_order(Order.Type.STOPLOSS, Product(products[0]).id, 3, 1, None, 38)
+from degiroapi.order_type import OrderType
+degiro.sell_order(OrderType.STOPLOSS, Product(products[0]).id, 3, 1, None, 38)
 ```
 
 ## Usage

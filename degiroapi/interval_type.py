@@ -1,4 +1,4 @@
-class DeGiroIntervalType:
+class IntervalType:
     """The interval for which we would like the historical data."""
 
     One_Day = ("P1D",)

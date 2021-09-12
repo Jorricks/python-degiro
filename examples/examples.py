@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 
-from degiroapi.datatypes import DeGiroDataType
+from degiroapi.data_type import DataType
 from degiroapi.degiro import DeGiro
-from degiroapi.intervaltypes import DeGiroIntervalType
-from degiroapi.order import OrderType
+from degiroapi.interval_type import IntervalType
+from degiroapi.order_type import OrderType
 from degiroapi.product import Product
 from degiroapi.utils import pretty_json
 
@@ -15,12 +15,12 @@ degiro.login("username", "password")
 degiro.logout()
 
 # print the current cash funds
-cashfunds = degiro.get_data(DeGiroDataType.CASH_FUNDS)
+cashfunds = degiro.get_data(DataType.CASH_FUNDS)
 for data in cashfunds:
     print(data)
 
 # print the current portfolio (True to filter Products with size 0, False to show all)
-portfolio = degiro.get_data(DeGiroDataType.PORTFOLIO, True)
+portfolio = degiro.get_data(DataType.PORTFOLIO, True)
 for data in portfolio:
     print(data)
 
@@ -68,7 +68,7 @@ degiro.delete_order("f278d56f-eaa0-4dc7-b067-45c6b4b3d74f")
 products = degiro.search_products("nrz")
 
 # Interval can be set to One_Day, One_Week, One_Month, Three_Months, Six_Months, One_Year, Three_Years, Five_Years, Max
-realprice = degiro.real_time_price(Product(products[0]).id, DeGiroIntervalType.One_Day)
+realprice = degiro.real_time_price(Product(products[0]).id, IntervalType.One_Day)
 
 # reatime data
 print(realprice[0]["data"]["lastPrice"])
