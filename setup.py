@@ -17,7 +17,7 @@ EXTRA_REQUIRES["devel"] = (
 )
 
 about: Dict[str, str] = {}
-with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "version.py"), "r") as f:
+with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "degiroapi", "version.py"), "r") as f:
     exec(f.read(), about)
 
 setuptools.setup(
@@ -25,7 +25,7 @@ setuptools.setup(
     version=about["__version__"],
     author="Lorenz Kraus and Jorrick Sleijster",
     author_email="jorricks3@gmail.com",
-    description="An unofficial API for the trading platform Degiro written in Python",
+    description="An unofficial API for the trading platform DeGiro written in Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/lolokraus/DegiroAPI",
