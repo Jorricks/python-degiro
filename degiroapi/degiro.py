@@ -6,6 +6,7 @@ import requests
 
 from degiroapi.client_info import ClientInfo
 from degiroapi.datatypes import DeGiroDataType
+from degiroapi.exceptions import DeGiroRequiresTOTP
 from degiroapi.order import OrderType
 
 
@@ -13,6 +14,7 @@ class DeGiro:
     """Class for executing API requests against DeGiro"""
 
     __LOGIN_URL = "https://trader.degiro.nl/login/secure/login"
+    __LOGIN_URL_TOTP = "https://trader.degiro.nl/login/secure/login/totp"
     __CONFIG_URL = "https://trader.degiro.nl/login/secure/config"
 
     __LOGOUT_URL = "https://trader.degiro.nl/trading/secure/logout"
@@ -39,20 +41,29 @@ class DeGiro:
     session_id: Optional[str] = None
     client_info: Optional[ClientInfo] = None
 
-    def login(self, username: str, password: str) -> Mapping:
+    def login(self, username: str, password: str, totp: Optional[str] = None) -> Mapping:
         login_payload = {
             "username": username,
             "password": password,
             "isPassCodeReset": False,
             "isRedirectToMobile": False,
         }
-        login_response = self.__request(
-            DeGiro.__LOGIN_URL,
-            None,
-            login_payload,
-            request_type=DeGiro.__POST_REQUEST,
-            error_message="Could not login.",
-        )
+        if totp:
+            login_payload["oneTimePassword"] = totp
+
+        try:
+            login_response = self.__request(
+                DeGiro.__LOGIN_URL_TOTP if totp else DeGiro.__LOGIN_URL,
+                None,
+                login_payload,
+                request_type=DeGiro.__POST_REQUEST,
+                error_message="Could not login.",
+            )
+        except Exception as exc:
+            if "totpNeeded" in str(exc):
+                raise DeGiroRequiresTOTP("You need to enter a Time-based One-time Password with the login credentials.")
+            raise exc
+
         self.session_id = login_response["sessionId"]  # type: ignore
         client_info_payload = {"sessionId": self.session_id}
         client_info_response = self.__request(
