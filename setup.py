@@ -17,7 +17,7 @@ EXTRA_REQUIRES["devel"] = (
 )
 
 about: Dict[str, str] = {}
-with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "degiroapi", "version.py"), "r") as f:
+with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "degiroapi", "__version__.py"), "r") as f:
     exec(f.read(), about)
 
 setuptools.setup(
