@@ -1,3 +1,9 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
+
+[tool.setuptools_scm]
+write_to = "degiroapi/__version__.py"
+
 [tool.black]
 line-length=120
 target-version=['py36']
