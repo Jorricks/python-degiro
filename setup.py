@@ -16,12 +16,12 @@ EXTRA_REQUIRES["devel"] = (
 
 setuptools.setup(
     name="python-degiro",
-    author="Lorenz Kraus and Jorrick Sleijster",
+    author="Jorrick Sleijster",
     author_email="jorricks3@gmail.com",
     description="An unofficial API for the trading platform DeGiro written in Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/lolokraus/DegiroAPI",
+    url="https://github.com/Jorricks/python-degiro",
     setup_requires=["setuptools_scm"],
     packages=setuptools.find_packages(),
     install_requires=["requests>=2.0.0"],
