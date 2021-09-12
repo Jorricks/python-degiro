@@ -1,5 +1,5 @@
 import datetime
-from typing import Mapping
+from typing import Mapping, Optional
 
 
 class Product:
@@ -13,8 +13,9 @@ class Product:
         self.__currency = product["currency"]
         self.__product_type = product["productTypeId"]
         self.__tradable = product["tradable"]
-        self.__close_price = product["closePrice"]
-        self.__close_price_date = datetime.datetime.strptime(product["closePriceDate"], "%Y-%m-%d").date()
+        self.__close_price = product.get("closePrice")
+        cpd = product.get("closePriceDate")
+        self.__close_price_date = datetime.datetime.strptime(cpd, "%Y-%m-%d").date() if cpd else None
 
     @property
     def id(self) -> str:
@@ -45,9 +46,9 @@ class Product:
         return self.__tradable
 
     @property
-    def close_price(self) -> str:
+    def close_price(self) -> Optional[str]:
         return self.__close_price
 
     @property
-    def close_price_date(self) -> datetime.date:
+    def close_price_date(self) -> Optional[datetime.date]:
         return self.__close_price_date

@@ -7,6 +7,7 @@ import requests
 from degiroapi.client_info import ClientInfo
 from degiroapi.data_type import DataType
 from degiroapi.exceptions import DeGiroRequiresTOTP
+from degiroapi.interval_type import IntervalType
 from degiroapi.order_type import OrderType
 
 
@@ -26,9 +27,11 @@ class DeGiro:
     __PRODUCT_INFO_URL = "https://trader.degiro.nl/product_search/secure/v5/products/info"
     __TRANSACTIONS_URL = "https://trader.degiro.nl/reporting/secure/v4/transactions"
     __ORDERS_URL = "https://trader.degiro.nl/reporting/secure/v4/order-history"
+    __ACCOUNT_URL = "https://trader.degiro.nl/reporting/secure/v6/accountoverview"
 
     __PLACE_ORDER_URL = "https://trader.degiro.nl/trading/secure/v5/checkOrder"
     __ORDER_URL = "https://trader.degiro.nl/trading/secure/v5/order/"
+    __DIVIDENDS_URL = "https://trader.degiro.nl/reporting/secure/v3/ca/"
 
     __DATA_URL = "https://trader.degiro.nl/trading/secure/v5/update/"
     __PRICE_DATA_URL = "https://charting.vwdservices.com/hchart/v1/deGiro/data.js"
@@ -36,10 +39,13 @@ class DeGiro:
     __GET_REQUEST = 0
     __POST_REQUEST = 1
     __DELETE_REQUEST = 2
+    __PUT_REQUEST = 3
 
-    client_token: Optional[str] = None
-    session_id: Optional[str] = None
-    client_info: Optional[ClientInfo] = None
+    def __init__(self):
+        self.session = requests.Session()
+        self.client_token: Optional[str] = None
+        self.session_id: Optional[str] = None
+        self.client_info: Optional[ClientInfo] = None
 
     def login(self, username: str, password: str, totp: Optional[str] = None) -> Mapping:
         login_payload = {
@@ -95,8 +101,8 @@ class DeGiro:
             error_message="Could not log out",
         )
 
-    @staticmethod
     def __request(
+        self,
         url: str,
         cookie: Optional[Mapping] = None,
         payload: Optional[Union[Mapping, List[Tuple], bytes]] = None,
@@ -108,17 +114,19 @@ class DeGiro:
     ) -> Union[Mapping, List]:
 
         if request_type == DeGiro.__DELETE_REQUEST:
-            response = requests.delete(url, json=payload)
+            response = self.session.delete(url, json=payload)
         elif request_type == DeGiro.__GET_REQUEST and cookie:
-            response = requests.get(url, cookies=cookie)
+            response = self.session.get(url, cookies=cookie)
         elif request_type == DeGiro.__GET_REQUEST:
-            response = requests.get(url, params=payload)
+            response = self.session.get(url, params=payload)
         elif request_type == DeGiro.__POST_REQUEST and headers and data:
-            response = requests.post(url, headers=headers, params=payload, data=data)
+            response = self.session.post(url, headers=headers, params=payload, data=data)
         elif request_type == DeGiro.__POST_REQUEST and post_params:
-            response = requests.post(url, params=post_params, json=payload)
+            response = self.session.post(url, params=post_params, json=payload)
         elif request_type == DeGiro.__POST_REQUEST:
-            response = requests.post(url, json=payload)
+            response = self.session.post(url, json=payload)
+        elif request_type == DeGiro.__PUT_REQUEST:
+            response = self.session.put(url, params=post_params, json=payload)
         else:
             raise ValueError(f"Unknown request type: {request_type}")
 
@@ -129,6 +137,28 @@ class DeGiro:
                 raise ValueError("No data was returned.")
         else:
             raise Exception(f"{error_message} Response: {response.text}")
+
+    def account_overview(self, from_date: datetime.datetime, to_date: datetime.datetime) -> Union[List, Mapping]:
+        account_payload = {
+            "fromDate": from_date.strftime("%d/%m/%Y"),
+            "toDate": to_date.strftime("%d/%m/%Y"),
+            "intAccount": self.client_info.account_id,
+            "sessionId": self.session_id,
+        }
+        return self.__request(  # type: ignore
+            DeGiro.__ACCOUNT_URL, None, account_payload, error_message="Could not get account overview."
+        )["data"]
+
+    def get_exchange_rate(self, exchange):
+        exchange_ids = {
+            "EUR/USD": "705366",
+            "EUR/GBP": "714324",
+            "EUR/CHF": "714322",
+            "EUR/JPY": "1316472",
+            "GBP/USD": "1788982",
+        }
+        last_rate = self.real_time_price(exchange_ids[exchange], interval=IntervalType.One_Day)[0]["data"]["lastPrice"]
+        return last_rate
 
     def search_products(self, search_text: str, limit: int = 1) -> List[Mapping]:
         product_search_payload = {
@@ -274,22 +304,20 @@ class DeGiro:
                 error_message="Could not get data",
             )  # type: ignore
 
-    def real_time_price(self, product_id, interval):
-        vw_id = self.product_info(product_id)["vwdId"]
-        tmp = vw_id
-        try:
-            int(tmp)
-        except ValueError:
-            vw_id = self.product_info(product_id)["vwdIdSecondary"]
+    def real_time_price(self, product_id: int, interval: str):
+        product_info = self.product_info(product_id)
+
+        vw_id = product_info["vwdId"]
+        vw_id_type = product_info["vwdIdentifierType"]
 
         price_payload = {
             "requestid": 1,
             "period": interval,
-            "series": ["issueid:" + vw_id, "price:issueid:" + vw_id],
+            "series": [vw_id_type + ":" + vw_id, "price:" + vw_id_type + ":" + vw_id],
             "userToken": self.client_token,
         }
 
-        return self.__request(
+        return self.__request(  # type: ignore
             DeGiro.__PRICE_DATA_URL, None, price_payload, error_message="Could not get real time price"
         )["series"]
 
@@ -391,6 +419,56 @@ class DeGiro:
             error_message="Could not confirm order",
         )
         return confirmation_id
+
+    def modify_order(
+        self,
+        order_type: int,
+        order_id: str,
+        product_id: str,
+        buy_sell: str,
+        time_type: int,
+        size: int,
+        limit: Optional[Union[int, float]] = None,
+    ) -> Mapping:
+        if buy_sell not in (
+            "SELL",
+            "BUY",
+        ):
+            raise ValueError("Parameter buy_sell should either be 'SELL' or 'BUY'")
+
+        modify_order_params = {
+            "intAccount": self.client_info.account_id,
+            "sessionId": self.session_id,
+        }
+        modify_order_payload = {
+            "buySell": buy_sell,
+            "orderType": order_type,
+            "productId": product_id,
+            "timeType": time_type,
+            "size": size,
+        }
+        if order_type == OrderType.LIMIT:
+            modify_order_payload["price"] = limit
+        elif order_type == OrderType.STOP_LOSS:
+            modify_order_payload["stopPrice"] = limit
+
+        return self.__request(  # type: ignore
+            DeGiro.__ORDER_URL + order_id + ";jsessionid=" + self.session_id,
+            None,
+            modify_order_payload,
+            modify_order_params,
+            request_type=DeGiro.__PUT_REQUEST,
+            error_message="Could not modify order" + " " + order_id,
+        )
+
+    def future_dividends(self) -> List[Mapping]:
+        dividends_payload = {"intAccount": self.client_info.account_id, "sessionId": self.session_id}
+        return self.__request(  # type: ignore
+            DeGiro.__DIVIDENDS_URL + str(self.client_info.account_id),
+            None,
+            dividends_payload,
+            error_message="Could not get future dividends.",
+        )["data"]
 
     def get_stock_list(self, index_id: int, stock_country_id: int) -> List[Mapping]:
         stock_list_params = {
