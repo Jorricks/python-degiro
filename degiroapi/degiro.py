@@ -1,6 +1,6 @@
 import datetime
 import json
-from typing import List, Mapping, Optional, Tuple, Union
+from typing import Dict, List, Mapping, Optional, Tuple, Union
 
 import requests
 
@@ -47,7 +47,11 @@ class DeGiro:
         self.session_id: Optional[str] = None
         self.client_info: Optional[ClientInfo] = None
 
-    def login(self, username: str, password: str, totp: Optional[str] = None) -> Mapping:
+    @staticmethod
+    def get_json(response: requests.Response) -> Union[List, Dict]:
+        pass
+
+    def login(self, username: str, password: str, totp: Optional[int] = None) -> Mapping:
         login_payload = {
             "username": username,
             "password": password,
