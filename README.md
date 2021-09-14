@@ -2,6 +2,11 @@
 
 An unofficial API for the trading platform Degiro written in Python with the ability to get real time data and historical data for products.
 
+# DEPRECATED!
+
+The package [degiro-connector](https://github.com/Chavithra/degiro-connector) contains the same and much more functionality.
+It is also maintained well. Hence, the decision to deprecate this repository.
+
 ## Credits
 
 This project is a fork from [DegiroAPI](https://github.com/lolokraus/DegiroAPI) by [lolokrauz](https://github.com/lolokraus).
